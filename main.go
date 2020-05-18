@@ -67,7 +67,9 @@ func ConnectToPostgres(connectionString string) (*pg.DB, error) {
 		return nil, errors.Wrap(err, "connecting to postgres with connection string: "+connectionString)
 	}
 
-	opt.MaxConnAge = time.Second
+	//opt.MaxConnAge = time.Second
+	//opt.IdleTimeout = 2 * time.Second
+	//opt.IdleCheckFrequency = time.Second
 	logrus.Infof("postgres opt: %+v", opt)
 	db := pg.Connect(opt)
 	_, err = db.Exec("SELECT 1")
