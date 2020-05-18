@@ -30,22 +30,7 @@ func main() {
 	}
 	logrus.Infof("connected to db %+v", connectionString)
 
-	go server()
-
-	cont, cancel := context.WithCancel(context.Background())
-	go func() {
-		sl := 17 * time.Second
-		logrus.Infof("waiting for %s before canceling", sl)
-		time.Sleep(sl)
-		logrus.Infof("canceling")
-		cancel()
-	}()
-	c, err := queryLong(cont, db)
-	if err != nil {
-		logrus.Errorf("%+v", err)
-	}
-	logrus.Infof("count: %+v", c)
-	select {}
+	server()
 }
 
 type Filing struct {
@@ -82,8 +67,8 @@ func ConnectToPostgres(connectionString string) (*pg.DB, error) {
 		return nil, errors.Wrap(err, "connecting to postgres with connection string: "+connectionString)
 	}
 
-	//opt.MaxConnAge
-
+	opt.MaxConnAge = time.Second
+	logrus.Infof("postgres opt: %+v", opt)
 	db := pg.Connect(opt)
 	_, err = db.Exec("SELECT 1")
 	if err != nil {
@@ -156,7 +141,7 @@ func handlerLong(c echo.Context) error {
 	if err != nil {
 		logrus.Errorf("%+v", err)
 	}
-	if err := c.JSON(200, map[string]interface{}{"count": count, "time": time.Since(t1)}); err != nil {
+	if err := c.JSON(200, map[string]interface{}{"count": count, "time": time.Since(t1).String()}); err != nil {
 		logrus.Errorf("error: %+v", err)
 		return err
 	}
