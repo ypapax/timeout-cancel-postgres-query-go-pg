@@ -154,7 +154,7 @@ func handlerLong(c echo.Context) error {
 func handlerLongTimeout(c echo.Context) error {
 	logrus.Tracef("hello handlerLongTimeout started")
 	t1 := time.Now()
-	ctx, _ := context.WithTimeout(c.Request().Context(), time.Second)
+	ctx, _ := context.WithTimeout(c.Request().Context(), 30 * time.Second)
 	count, err := queryLong(ctx, db)
 	if err != nil {
 		logrus.Errorf("%+v", err)
