@@ -130,6 +130,7 @@ func Prepare(logLevel logrus.Level) {
 func server() {
 	e := echo.New()
 	e.GET("/long", handlerLong)
+	e.GET("/long-timeout", handlerLongTimeout)
 	e.GET("/fast", handlerFast)
 	logrus.Tracef("listening %+v", port)
 	e.Logger.Fatal(e.Start(":" + port))
@@ -140,6 +141,21 @@ func handlerLong(c echo.Context) error {
 	logrus.Tracef("hello handlerLong started")
 	t1 := time.Now()
 	count, err := queryLong(c.Request().Context(), db)
+	if err != nil {
+		logrus.Errorf("%+v", err)
+	}
+	if err := c.JSON(200, map[string]interface{}{"count": count, "time": time.Since(t1).String()}); err != nil {
+		logrus.Errorf("error: %+v", err)
+		return err
+	}
+	return nil
+}
+
+func handlerLongTimeout(c echo.Context) error {
+	logrus.Tracef("hello handlerLongTimeout started")
+	t1 := time.Now()
+	ctx, _ := context.WithTimeout(c.Request().Context(), time.Second)
+	count, err := queryLong(ctx, db)
 	if err != nil {
 		logrus.Errorf("%+v", err)
 	}
